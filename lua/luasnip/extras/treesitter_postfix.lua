@@ -152,7 +152,8 @@ local function generate_resolve_expand_param(match_tsnode, user_resolver)
 
 		local row, col = unpack(pos)
 
-		local best_match, prefix_node = match_tsnode(ts_parser, { row, col })
+		local best_match, prefix_node =
+			match_tsnode(ts_parser, { row, col + #matched_trigger })
 
 		if best_match == nil or prefix_node == nil then
 			return nil
@@ -165,6 +166,11 @@ local function generate_resolve_expand_param(match_tsnode, user_resolver)
 			-- filled subsequently.
 			LS_TSDATA = {},
 		}
+
+		-- remove trigger from last element?
+		env.LS_TSMATCH[#env.LS_TSMATCH] =
+			env.LS_TSMATCH[#env.LS_TSMATCH]:sub(0, -#matched_trigger - 1)
+
 		for capture_name, node in pairs(best_match) do
 			env["LS_TSCAPTURE_" .. capture_name:upper()] =
 				vim.split(ts_parser:get_node_text(node), "\n")
